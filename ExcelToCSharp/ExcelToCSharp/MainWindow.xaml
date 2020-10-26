@@ -34,7 +34,7 @@
 						<TextBox Name="txtClassName" Text="table" VerticalAlignment="Center" Margin="0,1,5,1" />
 					</DockPanel>
 					<DockPanel Name="panelUnderscore" Background="LightGray">
-						<CheckBox Name="cbPascal" IsChecked="True" Margin="5" Click="cbPascal_Click">Convert to Pascal case</CheckBox>
+						<CheckBox Name="cbPascal" IsChecked="True" Margin="5" Click="CbPascal_Click">Convert to Pascal case</CheckBox>
 					</DockPanel>
 				</StackPanel>
 				<Grid>
@@ -53,12 +53,12 @@
 					</DataGrid>
 					<local:ucSpinnerDotCircle x:Name="Spinner" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
 				</Grid>
-				<Button Name="btnClass" Click="btnClass_Click" Visibility="Collapsed" Background="#9988ff">
+				<Button Name="btnClass" Click="BtnClass_Click" Visibility="Collapsed" Background="#9988ff">
 					<Grid>
 						<Label Name="lblBtnClass" HorizontalAlignment="Center">Copy class definition to clipboard</Label>
 					</Grid>
 				</Button>
-				<Button Name="btnJson" Click="btnJson_Click" Visibility="Collapsed" Background="#9988ff">
+				<Button Name="btnJson" Click="BtnJson_Click" Visibility="Collapsed" Background="#9988ff">
 					<Grid>
 						<Label Name="lblBtnJson" HorizontalAlignment="Center">Copy JSON to clipboard</Label>
 					</Grid>

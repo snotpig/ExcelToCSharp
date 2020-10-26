@@ -35,28 +35,6 @@ namespace ExcelToCSharp
 				LoadFile();
 			}
 		}
-		private void BtnOpen_Click(object sender, RoutedEventArgs e)
-		{
-			var openFileDialog = new OpenFileDialog();
-
-			openFileDialog.Filter = $"Excel files (*{string.Join("; *", _extensions)})|*{string.Join("; *", _extensions)}";
-			var result = openFileDialog.ShowDialog();
-			if (result.Value)
-			{
-				_filePath = openFileDialog.FileName;
-				LoadFile();
-			}
-		}
-
-		private void DropPanel_Drop(object sender, DragEventArgs e)
-		{
-			var files = (string[])e.Data.GetData(DataFormats.FileDrop);
-			if (files != null)
-			{
-				_filePath = files[0];
-				LoadFile();
-			}
-		}
 
 		private void LoadFile()
 		{
@@ -102,31 +80,6 @@ namespace ExcelToCSharp
 			MessageBox.Show(message, "Error!");
 		}
 
-		private void CbAll_Checked(object sender, RoutedEventArgs e)
-		{
-			_cSharpBuilder.Columns.ForEach(c => c.Include = true);
-		}
-
-		private void CbAll_Unchecked(object sender, RoutedEventArgs e)
-		{
-			_cSharpBuilder.Columns.ForEach(c => c.Include = false);
-		}
-
-		private void ComboSheet_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-		{
-			_cSharpBuilder.OpenWorksheet(ComboWorksheet.SelectedIndex + 1, cbPascal.IsChecked ?? false);
-			dgColumns.ItemsSource = _cSharpBuilder.Columns;
-		}
-
-		private void btnClass_Click(object sender, RoutedEventArgs e)
-		{
-			GenerateCode("c#");
-		}
-		private void btnJson_Click(object sender, RoutedEventArgs e)
-		{
-			GenerateCode("json");
-		}
-
 		private void GenerateCode(string type)
 		{
 			if (_cSharpBuilder.Columns.Any(c => c.Include))
@@ -144,6 +97,18 @@ namespace ExcelToCSharp
 				ShowMessage("You must include at least one column");
 		}
 
+		private void ShowButtons(bool show = true)
+		{
+			var visibility = show ? Visibility.Visible : Visibility.Collapsed;
+			btnClass.Visibility = visibility;
+			btnJson.Visibility = visibility;
+		}
+
+		private void EnableButtons(bool enable = true)
+		{
+			btnClass.IsEnabled = enable;
+			btnJson.IsEnabled = enable;
+		}
 		private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
 			var args = e.Argument as string[];
@@ -193,22 +158,58 @@ namespace ExcelToCSharp
 			EnableButtons();
 		}
 
-		private void ShowButtons(bool show = true)
+		private void BtnOpen_Click(object sender, RoutedEventArgs e)
 		{
-			var visibility = show ? Visibility.Visible : Visibility.Collapsed;
-			btnClass.Visibility = visibility;
-			btnJson.Visibility = visibility;
+			var openFileDialog = new OpenFileDialog();
+
+			openFileDialog.Filter = $"Excel files (*{string.Join("; *", _extensions)})|*{string.Join("; *", _extensions)}";
+			var result = openFileDialog.ShowDialog();
+			if (result.Value)
+			{
+				_filePath = openFileDialog.FileName;
+				LoadFile();
+			}
 		}
 
-		private void EnableButtons(bool enable = true)
+		private void DropPanel_Drop(object sender, DragEventArgs e)
 		{
-			btnClass.IsEnabled = enable;
-			btnJson.IsEnabled = enable;
+			var files = (string[])e.Data.GetData(DataFormats.FileDrop);
+			if (files != null)
+			{
+				_filePath = files[0];
+				LoadFile();
+			}
 		}
 
-		private void cbPascal_Click(object sender, RoutedEventArgs e)
+		private void CbAll_Checked(object sender, RoutedEventArgs e)
 		{
-			PopulateGrid();
+			_cSharpBuilder.Columns.ForEach(c => c.Include = true);
+		}
+
+		private void CbAll_Unchecked(object sender, RoutedEventArgs e)
+		{
+			_cSharpBuilder.Columns.ForEach(c => c.Include = false);
+		}
+
+		private void ComboSheet_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+		{
+			_cSharpBuilder.OpenWorksheet(ComboWorksheet.SelectedIndex + 1, cbPascal.IsChecked ?? false);
+			dgColumns.ItemsSource = _cSharpBuilder.Columns;
+		}
+
+		private void BtnClass_Click(object sender, RoutedEventArgs e)
+		{
+			GenerateCode("c#");
+		}
+		private void BtnJson_Click(object sender, RoutedEventArgs e)
+		{
+			GenerateCode("json");
+		}
+
+		private void CbPascal_Click(object sender, RoutedEventArgs e)
+		{
+			if(!string.IsNullOrEmpty(_filePath))
+				PopulateGrid();
 		}
 	}
 }
