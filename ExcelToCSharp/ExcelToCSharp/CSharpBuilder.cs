@@ -24,13 +24,7 @@ namespace ExcelToCSharp
             var worksheet = _worksheets.ElementAt(index);
             _values = worksheet.Rows.Skip(1);
             Columns = worksheet.Rows.First()
-                .Select((h, i) => new Column(convertToPascalCase ? h.ToPascalCase() : h, _values.All(v => (v.Count() <= i) || Regex.IsMatch(v.ElementAt(i), @"^\d{2}/\d{2}/\d{4}"))
-                    ? "DateTime"
-                    : _values.All(v => (v.Count() <= i) || int.TryParse(v.ElementAt(i), out var n))
-                        ? "int"
-                        : _values.All(v => (v.Count() <= i) || decimal.TryParse(v.ElementAt(i), out var d))
-                            ? "decimal" 
-                            : "string", i))
+                .Select((h, i) => new Column(convertToPascalCase ? h.ToPascalCase() : h, GetType(i), i))
                 .Where(c => !ignoreEmptyHeaders || !string.IsNullOrEmpty(c.Name)).ToList();
         }
 
@@ -75,10 +69,12 @@ namespace ExcelToCSharp
         {
             switch(type)
             {
+                case "int?":
+                case "decimal?":
+                    return string.IsNullOrWhiteSpace(value) ? "null" : value;
                 case "int":
                 case "decimal":
-                    var rv = string.IsNullOrWhiteSpace(value) ? "0" : value;
-                    return rv;
+                    return string.IsNullOrWhiteSpace(value) ? "0" : value;
                 case "string":
                     return $"\"{value}\"";
                 case "DateTime":
@@ -86,6 +82,23 @@ namespace ExcelToCSharp
                 default:
                     throw new InvalidOperationException($"Unecognised type: {type}");
             }
+        }
+
+        private string GetType(int i)
+        {
+            return _values.All(v => (v.Count() <= i) || Regex.IsMatch(v.ElementAt(i), @"^\d{2}/\d{2}/\d{4}"))
+                ? "DateTime"
+                : _values.All(v => (v.Count() <= i) || string.IsNullOrEmpty(v.ElementAt(i)) || v.ElementAt(i).ToLower() == "null" || Regex.IsMatch(v.ElementAt(i), @"^\d{2}/\d{2}/\d{4}"))
+                    ? "DateTime?"
+                    : _values.All(v => (v.Count() <= i) || int.TryParse(v.ElementAt(i), out var n))
+                        ? "int"
+                        : _values.All(v => (v.Count() <= i) || string.IsNullOrEmpty(v.ElementAt(i)) || v.ElementAt(i).ToLower() == "null" || int.TryParse(v.ElementAt(i), out var n))
+                            ? "int?"
+                            : _values.All(v => (v.Count() <= i) || decimal.TryParse(v.ElementAt(i), out var d))
+                                ? "decimal"
+                                : _values.All(v => (v.Count() <= i) || string.IsNullOrEmpty(v.ElementAt(i)) || v.ElementAt(i).ToLower() == "null" || decimal.TryParse(v.ElementAt(i), out var d))
+                                    ? "decimal?"
+                                    : "string";
         }
     }
 }
