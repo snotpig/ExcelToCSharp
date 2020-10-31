@@ -11,7 +11,6 @@ namespace ExcelToCSharp
     {
         private readonly IEnumerable<Worksheet> _worksheets;
         private IEnumerable<IEnumerable<string>> _values;
-        private bool _convertToPascalCase;
         public string ClassName { get; set; }
         public List<Column> Columns { get; set; }
 
@@ -22,7 +21,6 @@ namespace ExcelToCSharp
 
         public void OpenWorksheet(int index, bool convertToPascalCase, bool ignoreEmptyHeaders)
         {
-            _convertToPascalCase = convertToPascalCase;
             var worksheet = _worksheets.ElementAt(index);
             _values = worksheet.Rows.Skip(1);
             Columns = worksheet.Rows.First()
@@ -44,7 +42,7 @@ namespace ExcelToCSharp
 
             var cSharp = selectedColumns
                 .Aggregate(new StringBuilder($"public class {ClassName}\n{{\n"), 
-                    (sb, v) => sb.Append($"     public {v.Type} {(_convertToPascalCase ? v.Name.ToPascalCase() : v.Name)} {{ get; set; }}{Environment.NewLine}"))
+                    (sb, v) => sb.Append($"     public {v.Type} {v.Name} {{ get; set; }}{Environment.NewLine}"))
                 .Append("}");
             worker.ReportProgress(100, "class");
             return cSharp.ToString();
