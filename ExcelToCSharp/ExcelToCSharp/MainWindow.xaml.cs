@@ -71,13 +71,18 @@ namespace ExcelToCSharp
 			dgColumns.Visibility = Visibility.Visible;
 			panelTableName.Visibility = Visibility.Visible;
 			ShowButtons();
-			SizeToContent = SizeToContent.Height;
-			MaxHeight = 200 + _cSharpBuilder.Columns.Count() * 19 + (_worksheets.Count() > 1 ? 26 : 0);
+			Resize();
 		}
 
 		public void ShowMessage(string message)
 		{
 			MessageBox.Show(message, "Error!");
+		}
+
+		private void Resize()
+		{
+			SizeToContent = SizeToContent.Height;
+			MaxHeight = 200 + _cSharpBuilder.Columns.Count() * 19 + (_worksheets.Count() > 1 ? 26 : 0);
 		}
 
 		private void GenerateCode(string type)
@@ -195,6 +200,7 @@ namespace ExcelToCSharp
 		{
 			_cSharpBuilder.OpenWorksheet(ComboWorksheet.SelectedIndex + 1, cbPascal.IsChecked ?? false);
 			dgColumns.ItemsSource = _cSharpBuilder.Columns;
+			Resize();
 		}
 
 		private void BtnClass_Click(object sender, RoutedEventArgs e)

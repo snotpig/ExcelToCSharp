@@ -7,7 +7,7 @@ namespace ExcelToCSharp
 	{
 		public static string ToPascalCase(this string str)
 		{
-			return string.Join("", str.Split(new[] { "_" }, StringSplitOptions.RemoveEmptyEntries)
+			return string.Join("", str.LTrimNonAlpha().Split(new[] { "_", " " }, StringSplitOptions.RemoveEmptyEntries)
 				.Select(s => $"{char.ToUpper(s[0])}{s.Substring(1)}"));
 		}
 
@@ -18,6 +18,11 @@ namespace ExcelToCSharp
 					.ToString("yyyy-MM-ddTHH:mm:ss");
 
 			return $"\"{dateString}\"";
+		}
+
+		private static string LTrimNonAlpha(this string str)
+		{
+			return string.Join("", str.Aggregate("", (t, v) => $"{t}{(!string.IsNullOrEmpty(t) || char.IsLetter(v) ? v.ToString() : "")}"));
 		}
 	}
 }

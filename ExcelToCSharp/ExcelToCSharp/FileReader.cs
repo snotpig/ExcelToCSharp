@@ -85,7 +85,7 @@ namespace ExcelToCSharp
                         {
                             var dt = cells[i, j] as DateTime?;
                             row.Add(dt == null
-                                ? cells[i, j]?.ToString()
+                                ? cells[i, j]?.ToString() ?? ""
                                 : dt.Value.ToString("dd/MM/yyyy HH:mm:ss"));
                         }
                         rows.Add(row);
