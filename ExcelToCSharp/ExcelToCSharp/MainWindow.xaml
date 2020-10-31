@@ -11,10 +11,10 @@
         MinWidth="270" MinHeight="62" MaxWidth="700" MaxHeight="1000" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top">
 	<Window.Resources>
 		<cm:BackgroundWorker x:Key="backgroundWorker" 
-			WorkerReportsProgress="True" ProgressChanged="progressChanged"
+			WorkerReportsProgress="True" ProgressChanged="ProgressChanged"
 			WorkerSupportsCancellation="False"
-			DoWork="backgroundWorker_DoWork"
-			RunWorkerCompleted="backgroundWorker_RunWorkerCompleted">
+			DoWork="BackgroundWorker_DoWork"
+			RunWorkerCompleted="BackgroundWorker_RunWorkerCompleted">
 		</cm:BackgroundWorker>
 		<th:DispatcherTimer x:Key="timer"
 			Tick="timer_Tick">
@@ -31,7 +31,7 @@
 					</DockPanel>
 					<DockPanel Name="panelTableName" Background="LightGray" Visibility="Collapsed">
 						<TextBlock Padding="5" DockPanel.Dock="Left" Width="80"><Run Text="Class Name"/></TextBlock>
-						<TextBox Name="txtClassName" Text="table" VerticalAlignment="Center" Margin="0,1,5,1" />
+						<TextBox Name="txtClassName" Text="Class1" VerticalAlignment="Center" Margin="0,1,5,1" />
 					</DockPanel>
 					<StackPanel Name="panelUnderscore" Background="LightGray">
 						<CheckBox Name="cbPascal" IsChecked="True" Margin="5" Click="CbPascal_Click">Convert to Pascal case</CheckBox>

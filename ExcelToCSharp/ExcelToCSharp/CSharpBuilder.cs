@@ -77,7 +77,8 @@ namespace ExcelToCSharp
             {
                 case "int":
                 case "decimal":
-                    return value;
+                    var rv = string.IsNullOrWhiteSpace(value) ? "0" : value;
+                    return rv;
                 case "string":
                     return $"\"{value}\"";
                 case "DateTime":

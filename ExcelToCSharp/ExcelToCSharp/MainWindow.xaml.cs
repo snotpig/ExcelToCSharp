@@ -52,7 +52,7 @@ namespace ExcelToCSharp
 			_backgroundWorker.RunWorkerAsync(new[] { "file", $"{((cbPascal.IsChecked ?? false) ? "pascal" : "")}" });
 		}
 
-		private void UpdateUi()
+		private void UpdateUI()
 		{
 			if (_worksheets == null)
 			{
@@ -74,6 +74,17 @@ namespace ExcelToCSharp
 				ComboWorksheet.SelectedItem = worksheetNames.First();
 				PanelWorksheet.Visibility = Visibility.Visible;
 			}
+			SetClassName();
+		}
+
+		private void SetClassName()
+		{
+			if (!string.IsNullOrEmpty((string)ComboWorksheet.SelectedItem))
+			{
+				var className = ((string)ComboWorksheet.SelectedItem).ToPascalCase();
+				if (!string.IsNullOrEmpty(className))
+					txtClassName.Text = className;
+			}
 		}
 
 		private void PopulateGrid()
@@ -92,7 +103,7 @@ namespace ExcelToCSharp
 		private void Resize()
 		{
 			SizeToContent = SizeToContent.Height;
-			MaxHeight = 225 + _cSharpBuilder.Columns.Count() * 19 + (_worksheets.Count() > 1 ? 26 : 0);
+			MaxHeight = 228 + _cSharpBuilder.Columns.Count() * 18.95 + (_worksheets.Count() > 1 ? 26 : 0);
 		}
 
 		private void GenerateCode(string type)
@@ -133,7 +144,7 @@ namespace ExcelToCSharp
 			btnClass.IsEnabled = enable;
 			btnJson.IsEnabled = enable;
 		}
-		private void backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+		private void BackgroundWorker_DoWork(object sender, DoWorkEventArgs e)
 		{
 			var args = e.Argument as string[];
 
@@ -154,12 +165,12 @@ namespace ExcelToCSharp
 			}
 		}
 
-		private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+		private void BackgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
 			if (e.Result as string == "file")
 			{
 				Spinner.Visibility = Visibility.Collapsed;
-				UpdateUi();
+				UpdateUI();
 			}
 			else
 			{
@@ -174,7 +185,7 @@ namespace ExcelToCSharp
 			}
 		}
 
-		private void progressChanged(object sender, ProgressChangedEventArgs e)
+		private void ProgressChanged(object sender, ProgressChangedEventArgs e)
 			=> pgClass.Value = pgJson.Value = e.ProgressPercentage;
 
 		private void timer_Tick(object sender, EventArgs e)
@@ -221,6 +232,7 @@ namespace ExcelToCSharp
 		{
 			PopulateGrid();
 			Resize();
+			SetClassName();
 		}
 
 		private void BtnClass_Click(object sender, RoutedEventArgs e)
