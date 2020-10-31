@@ -7,7 +7,7 @@ namespace ExcelToCSharp
 	{
 		public static string ToPascalCase(this string str)
 		{
-			return string.Join("", str.LTrimNonAlpha().Split(new[] { "_", " " }, StringSplitOptions.RemoveEmptyEntries)
+			return string.Join("", str.ReplaceSymbols().LTrimNonAlpha().Split(new[] { "_", " ", "(", ")", "-", "|", ":", "." }, StringSplitOptions.RemoveEmptyEntries)
 				.Select(s => $"{char.ToUpper(s[0])}{s.Substring(1)}"));
 		}
 
@@ -23,6 +23,12 @@ namespace ExcelToCSharp
 		private static string LTrimNonAlpha(this string str)
 		{
 			return string.Join("", str.Aggregate("", (t, v) => $"{t}{(!string.IsNullOrEmpty(t) || char.IsLetter(v) ? v.ToString() : "")}"));
+		}
+
+		private static string ReplaceSymbols(this string str)
+		{
+			return str.Replace("%", "Percent").Replace("£", "GBP").Replace("&", " And")
+				.Replace("ID", "Id").Replace("PDS", "Pds").Replace("ISIN", "Isin").Replace("SEDOL", "Sedol");
 		}
 	}
 }

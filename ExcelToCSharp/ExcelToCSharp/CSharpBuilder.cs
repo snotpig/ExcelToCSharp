@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace ExcelToCSharp
 {
@@ -16,16 +15,15 @@ namespace ExcelToCSharp
         public string ClassName { get; set; }
         public List<Column> Columns { get; set; }
 
-        public CSharpBuilder(IEnumerable<Worksheet> worksheets, bool convertToPascalCase)
+        public CSharpBuilder(IEnumerable<Worksheet> worksheets)
         {
             _worksheets = worksheets;
-            OpenWorksheet(1, convertToPascalCase);
         }
 
-        public void OpenWorksheet(int index, bool convertToPascalCase)
+        public void OpenWorksheet(int index, bool convertToPascalCase, bool ignoreEmptyHeaders)
         {
             _convertToPascalCase = convertToPascalCase;
-            var worksheet = _worksheets.ElementAt(index - 1);
+            var worksheet = _worksheets.ElementAt(index);
             _values = worksheet.Rows.Skip(1);
             Columns = worksheet.Rows.First()
                 .Select((h, i) => new Column(convertToPascalCase ? h.ToPascalCase() : h, _values.All(v => (v.Count() <= i) || Regex.IsMatch(v.ElementAt(i), @"^\d{2}/\d{2}/\d{4}"))
@@ -34,11 +32,13 @@ namespace ExcelToCSharp
                         ? "int"
                         : _values.All(v => (v.Count() <= i) || decimal.TryParse(v.ElementAt(i), out var d))
                             ? "decimal" 
-                            : "string")).ToList();
+                            : "string", i))
+                .Where(c => !ignoreEmptyHeaders || !string.IsNullOrEmpty(c.Name)).ToList();
         }
 
         public string GetClassDefinition(BackgroundWorker worker)
         {
+            worker.ReportProgress(50, "class");
             var values = _values.ToList();
             var selectedColumns = Columns.Where(c => c.Include).ToList();
 
@@ -46,12 +46,13 @@ namespace ExcelToCSharp
                 .Aggregate(new StringBuilder($"public class {ClassName}\n{{\n"), 
                     (sb, v) => sb.Append($"     public {v.Type} {(_convertToPascalCase ? v.Name.ToPascalCase() : v.Name)} {{ get; set; }}{Environment.NewLine}"))
                 .Append("}");
-            worker.ReportProgress(100);
+            worker.ReportProgress(100, "class");
             return cSharp.ToString();
         }
 
         public string GetJson(BackgroundWorker worker)
         {
+            worker.ReportProgress(50, "json");
             var values = _values.ToList();
             var selectedColumns = Columns.Where(c => c.Include).ToList();
 
@@ -59,6 +60,7 @@ namespace ExcelToCSharp
                 , (sb, v) => sb.Append($"\t{{\n\t\t{GetObjects(selectedColumns, v)}\n\t}},\n"));
             json.Length -= 2;
             json.Append("\n]");
+            worker.ReportProgress(100, "json");
             return json.ToString();
         }
 
@@ -66,7 +68,7 @@ namespace ExcelToCSharp
         {
             var names = Columns.Select(c => c.Name).ToList();
             var objects = columns.Aggregate(new StringBuilder(), 
-                (sb, c) => sb.Append($"\"{c.Name}\": {GetValue(c.Type, values.ElementAt(names.IndexOf(c.Name)))}{(c.Name == names.Last() ? "" : $"\n\t\t")}"));
+                (sb, c) => sb.Append($"\"{c.Name}\": {GetValue(c.Type, values.ElementAt(c.Index))}{(c.Name == names.Last() ? "" : $"\n\t\t")}"));
 
             return objects.ToString();
         }

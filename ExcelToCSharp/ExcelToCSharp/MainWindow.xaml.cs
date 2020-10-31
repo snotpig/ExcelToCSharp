@@ -27,7 +27,7 @@ namespace ExcelToCSharp
 			InitializeComponent();
 			_backgroundWorker = (BackgroundWorker)FindResource("backgroundWorker");
 			_timer = (DispatcherTimer)FindResource("timer");
-			_timer.Interval = TimeSpan.FromSeconds(0.3);
+			_timer.Interval = TimeSpan.FromSeconds(0.5);
 
 			if (App.Args != null)
 			{
@@ -52,14 +52,21 @@ namespace ExcelToCSharp
 			_backgroundWorker.RunWorkerAsync(new[] { "file", $"{((cbPascal.IsChecked ?? false) ? "pascal" : "")}" });
 		}
 
-		private void PopulateGrid()
+		private void UpdateUi()
 		{
 			if (_worksheets == null)
 			{
 				ShowMessage($"Can't open {_filePath}");
 				return;
 			}
-			_cSharpBuilder = new CSharpBuilder(_worksheets, cbPascal.IsChecked ?? false);
+			UpdateWorksheetDropdown();
+			PopulateGrid();
+			ShowButtons();
+			Resize();
+		}
+
+		private void UpdateWorksheetDropdown()
+		{ 
 			if (_worksheets.Count() > 1)
 			{
 				var worksheetNames = _worksheets.Select((w, i) => $" {i + 1}   {w.Title}");
@@ -67,33 +74,45 @@ namespace ExcelToCSharp
 				ComboWorksheet.SelectedItem = worksheetNames.First();
 				PanelWorksheet.Visibility = Visibility.Visible;
 			}
+		}
+
+		private void PopulateGrid()
+		{
+			var worksheetIndex = _worksheets.Count() > 1 ? ComboWorksheet.SelectedIndex : 0;
+			_cSharpBuilder = new CSharpBuilder(_worksheets);
+			_cSharpBuilder.OpenWorksheet(worksheetIndex, cbPascal.IsChecked ?? false, cbIgnoreEmpty.IsChecked ?? false);
 			dgColumns.ItemsSource = _cSharpBuilder.Columns;
 			dgColumns.Visibility = Visibility.Visible;
 			panelTableName.Visibility = Visibility.Visible;
-			ShowButtons();
-			Resize();
 		}
 
 		public void ShowMessage(string message)
-		{
-			MessageBox.Show(message, "Error!");
-		}
+			=> MessageBox.Show(message, "Error!");		
 
 		private void Resize()
 		{
 			SizeToContent = SizeToContent.Height;
-			MaxHeight = 200 + _cSharpBuilder.Columns.Count() * 19 + (_worksheets.Count() > 1 ? 26 : 0);
+			MaxHeight = 225 + _cSharpBuilder.Columns.Count() * 19 + (_worksheets.Count() > 1 ? 26 : 0);
 		}
 
 		private void GenerateCode(string type)
 		{
 			if (_cSharpBuilder.Columns.Any(c => c.Include))
 			{
-				btnClass.IsEnabled = false;
-				progress.Value = 0;
+				EnableButtons(false);
+				pgClass.Value = pgJson.Value = 0;
 				SizeToContent = SizeToContent.Manual;
-				ShowButtons(false);
-				progress.Visibility = Visibility.Visible;
+
+				if (type == "c#")
+				{
+					btnClass.Visibility = Visibility.Collapsed;
+					pgClass.Visibility = Visibility.Visible;
+				}
+				else
+				{
+					btnJson.Visibility = Visibility.Collapsed;
+					pgJson.Visibility = Visibility.Visible;
+				}
 				SizeToContent = SizeToContent.Height;
 				_cSharpBuilder.ClassName = txtClassName.Text;
 				_backgroundWorker.RunWorkerAsync(new[] { type });
@@ -121,12 +140,12 @@ namespace ExcelToCSharp
 			if (args[0] == "c#")
 			{
 				_code = _cSharpBuilder.GetClassDefinition(sender as BackgroundWorker);
-				e.Result = "code";
+				e.Result = args[0];
 			}
 			else if (args[0] == "json")
 			{
 				_code = _cSharpBuilder.GetJson(sender as BackgroundWorker);
-				e.Result = "code";
+				e.Result = args[0];
 			}
 			else
 			{
@@ -137,30 +156,36 @@ namespace ExcelToCSharp
 
 		private void backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 		{
-			if (e.Result as string == "code")
+			if (e.Result as string == "file")
 			{
-				Clipboard.SetText(_code);
-				_timer.Start();
+				Spinner.Visibility = Visibility.Collapsed;
+				UpdateUi();
 			}
 			else
 			{
-				Spinner.Visibility = Visibility.Collapsed;
-				PopulateGrid();
+				Clipboard.SetText(_code);
+				if (e.Result as string == "c#")
+					btnClass.Visibility = Visibility.Collapsed;
+
+				else
+					btnJson.Visibility = Visibility.Collapsed;
+
+				_timer.Start();
 			}
 		}
 
 		private void progressChanged(object sender, ProgressChangedEventArgs e)
-		{
-			progress.Value = e.ProgressPercentage;
-		}
+			=> pgClass.Value = pgJson.Value = e.ProgressPercentage;
 
 		private void timer_Tick(object sender, EventArgs e)
 		{
 			SizeToContent = SizeToContent.Manual;
-			progress.Visibility = Visibility.Collapsed;
+			pgClass.Visibility = pgJson.Visibility = Visibility.Collapsed;
 			ShowButtons();
 			SizeToContent = SizeToContent.Height;
 			EnableButtons();
+			_timer.Stop();
+			Resize();
 		}
 
 		private void BtnOpen_Click(object sender, RoutedEventArgs e)
@@ -187,35 +212,36 @@ namespace ExcelToCSharp
 		}
 
 		private void CbAll_Checked(object sender, RoutedEventArgs e)
-		{
-			_cSharpBuilder.Columns.ForEach(c => c.Include = true);
-		}
+			=> _cSharpBuilder.Columns.ForEach(c => c.Include = true);
 
 		private void CbAll_Unchecked(object sender, RoutedEventArgs e)
-		{
-			_cSharpBuilder.Columns.ForEach(c => c.Include = false);
-		}
+			=> _cSharpBuilder.Columns.ForEach(c => c.Include = false);
 
 		private void ComboSheet_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
 		{
-			_cSharpBuilder.OpenWorksheet(ComboWorksheet.SelectedIndex + 1, cbPascal.IsChecked ?? false);
-			dgColumns.ItemsSource = _cSharpBuilder.Columns;
+			PopulateGrid();
 			Resize();
 		}
 
 		private void BtnClass_Click(object sender, RoutedEventArgs e)
-		{
-			GenerateCode("c#");
-		}
+			=> GenerateCode("c#");
+
 		private void BtnJson_Click(object sender, RoutedEventArgs e)
-		{
-			GenerateCode("json");
-		}
+			=> GenerateCode("json");
 
 		private void CbPascal_Click(object sender, RoutedEventArgs e)
 		{
-			if(!string.IsNullOrEmpty(_filePath))
+			if (!string.IsNullOrEmpty(_filePath))
 				PopulateGrid();
+		}
+
+		private void CbIgnoreEmpty_Click(object sender, RoutedEventArgs e)
+		{
+			if (!string.IsNullOrEmpty(_filePath))
+			{
+				PopulateGrid();
+				Resize();
+			}
 		}
 	}
 }

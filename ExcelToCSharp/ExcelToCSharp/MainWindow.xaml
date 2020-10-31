@@ -7,8 +7,8 @@
         xmlns:th="clr-namespace:System.Windows.Threading;assembly=WindowsBase"
         xmlns:local="clr-namespace:ExcelToCSharp"
 		mc:Ignorable="d"
-        Title="SQLtoC#" Height="250" Width="270" ResizeMode="CanResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen" SizeToContent="Height" 
-        MinWidth="270" MinHeight="62" MaxWidth="500" MaxHeight="1000" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top">
+        Title="SQLtoC#" Height="250" Width="330" ResizeMode="CanResize" WindowStyle="ToolWindow" WindowStartupLocation="CenterScreen" SizeToContent="Height" 
+        MinWidth="270" MinHeight="62" MaxWidth="700" MaxHeight="1000" ScrollViewer.VerticalScrollBarVisibility="Auto" VerticalContentAlignment="Top">
 	<Window.Resources>
 		<cm:BackgroundWorker x:Key="backgroundWorker" 
 			WorkerReportsProgress="True" ProgressChanged="progressChanged"
@@ -33,9 +33,10 @@
 						<TextBlock Padding="5" DockPanel.Dock="Left" Width="80"><Run Text="Class Name"/></TextBlock>
 						<TextBox Name="txtClassName" Text="table" VerticalAlignment="Center" Margin="0,1,5,1" />
 					</DockPanel>
-					<DockPanel Name="panelUnderscore" Background="LightGray">
+					<StackPanel Name="panelUnderscore" Background="LightGray">
 						<CheckBox Name="cbPascal" IsChecked="True" Margin="5" Click="CbPascal_Click">Convert to Pascal case</CheckBox>
-					</DockPanel>
+						<CheckBox Name="cbIgnoreEmpty" IsChecked="True" Margin="5" Click="CbIgnoreEmpty_Click">Ignore empty headers</CheckBox>
+					</StackPanel>
 				</StackPanel>
 				<Grid>
 					<DataGrid Name="dgColumns" AutoGenerateColumns="False" Visibility="Collapsed">
@@ -58,12 +59,13 @@
 						<Label Name="lblBtnClass" HorizontalAlignment="Center">Copy class definition to clipboard</Label>
 					</Grid>
 				</Button>
+				<ProgressBar Name="pgClass" Height="30" Foreground="#FF440077" Visibility="Collapsed"></ProgressBar>
 				<Button Name="btnJson" Click="BtnJson_Click" Visibility="Collapsed" Background="#9988ff">
 					<Grid>
 						<Label Name="lblBtnJson" HorizontalAlignment="Center">Copy JSON to clipboard</Label>
 					</Grid>
 				</Button>
-				<ProgressBar Name="progress" Height="30" Foreground="#FF5566FF" Visibility="Collapsed"></ProgressBar>
+				<ProgressBar Name="pgJson" Height="30" Foreground="#FF440077" Visibility="Collapsed"></ProgressBar>
 			</StackPanel>
 		</Grid>
 	</ScrollViewer>
