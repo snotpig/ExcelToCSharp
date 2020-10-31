@@ -5,6 +5,11 @@ VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelToCSharp", "ExcelToCSharp\ExcelToCSharp.csproj", "{C67247B7-2507-4BD2-94D2-1E94C3FF3125}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{03B13B24-02F9-4105-8EA5-1D49D6269C7E}"
+	ProjectSection(SolutionItems) = preProject
+		..\..\..\..\Pictures\Icons\Excel_CSharp.ico = ..\..\..\..\Pictures\Icons\Excel_CSharp.ico
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
