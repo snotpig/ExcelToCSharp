@@ -4,24 +4,30 @@ using System.Text.RegularExpressions;
 
 namespace ExcelToCSharp
 {
-	static class StringExtensions
+	static class Extensions
 	{
+		// string extensions
 		public static string ToPascalCase(this string str)
 		{
-			Regex.Replace(str, "[a-z][A-Z0-9]", m => $"{m.Value[0]}-{m.Value[1]}");
+			str = Regex.Replace(str.ReplaceSymbols().LTrimNonAlpha(), "[a-z][A-Z0-9]", m => $"{m.Value[0]}-{m.Value[1]}");
 
-			return string.Join("", str.ReplaceSymbols().LTrimNonAlpha()
+			return string.Join("", str
 				.Split(new[] { "_", " ", "(", ")", "-", "|", ":", "." }, StringSplitOptions.RemoveEmptyEntries)
 				.Select(s => $"{char.ToUpper(s[0])}{s.Substring(1).ToLower()}"));
 		}
 
 		public static string ToJsonDateTime(this string str)
 		{
-			var dateString = new DateTime(int.Parse(str.Substring(6, 4)), int.Parse(str.Substring(3, 2)), 
+			var dateString = new DateTime(int.Parse(str.Substring(6, 4)), int.Parse(str.Substring(3, 2)),
 				int.Parse(str.Substring(0, 2)), int.Parse(str.Substring(11, 2)), int.Parse(str.Substring(14, 2)), 0)
-					.ToString("yyyy-MM-ddTHH:mm:ss");
+					.ToJsonDateTimeString();
 
 			return $"\"{dateString}\"";
+		}
+
+		public static bool IsId(this string str)
+		{
+			return str.Length > 1 && str.Substring(str.Length - 2).ToLower() == "id";
 		}
 
 		private static string LTrimNonAlpha(this string str)
@@ -36,5 +42,10 @@ namespace ExcelToCSharp
 				.Replace("PDSID", "PdsId").Replace("ID", "Id");
 		}
 
+		// DateTime extensions
+		public static string ToJsonDateTimeString(this DateTime dt)
+		{
+			return dt.ToString("yyyy-MM-ddTHH:mm:ss");
+		}
 	}
 }

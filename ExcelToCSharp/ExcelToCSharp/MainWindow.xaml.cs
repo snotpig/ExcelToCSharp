@@ -91,7 +91,8 @@ namespace ExcelToCSharp
 		{
 			var worksheetIndex = _worksheets.Count() > 1 ? ComboWorksheet.SelectedIndex : 0;
 			_cSharpBuilder = new CSharpBuilder(_worksheets);
-			_cSharpBuilder.OpenWorksheet(worksheetIndex, cbPascal.IsChecked ?? false, cbIgnoreEmpty.IsChecked ?? false);
+			_cSharpBuilder
+				.OpenWorksheet(worksheetIndex, cbPascal.IsChecked ?? false, cbIgnoreEmpty.IsChecked ?? false, cbDecimal.IsChecked ?? false);
 			dgColumns.ItemsSource = _cSharpBuilder.Columns;
 			dgColumns.Visibility = Visibility.Visible;
 			panelTableName.Visibility = Visibility.Visible;
@@ -125,7 +126,6 @@ namespace ExcelToCSharp
 					pgJson.Visibility = Visibility.Visible;
 				}
 				SizeToContent = SizeToContent.Height;
-				_cSharpBuilder.ClassName = txtClassName.Text;
 				_backgroundWorker.RunWorkerAsync(new[] { type });
 			}
 			else
@@ -150,7 +150,7 @@ namespace ExcelToCSharp
 
 			if (args[0] == "c#")
 			{
-				_code = _cSharpBuilder.GetClassDefinition(sender as BackgroundWorker);
+				_code = _cSharpBuilder.GetClassDefinition(sender as BackgroundWorker, txtClassName.Text);
 				e.Result = args[0];
 			}
 			else if (args[0] == "json")
@@ -188,7 +188,7 @@ namespace ExcelToCSharp
 		private void ProgressChanged(object sender, ProgressChangedEventArgs e)
 			=> pgClass.Value = pgJson.Value = e.ProgressPercentage;
 
-		private void timer_Tick(object sender, EventArgs e)
+		private void Timer_Tick(object sender, EventArgs e)
 		{
 			SizeToContent = SizeToContent.Manual;
 			pgClass.Visibility = pgJson.Visibility = Visibility.Collapsed;
@@ -254,6 +254,12 @@ namespace ExcelToCSharp
 				PopulateGrid();
 				Resize();
 			}
+		}
+
+		private void CbDecimal_Click(object sender, RoutedEventArgs e)
+		{
+			if (!string.IsNullOrEmpty(_filePath))
+				PopulateGrid();
 		}
 	}
 }
