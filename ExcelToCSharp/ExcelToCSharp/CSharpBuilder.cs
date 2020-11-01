@@ -86,19 +86,48 @@ namespace ExcelToCSharp
 
         private string GetType(int i)
         {
-            return _values.All(v => (v.Count() <= i) || Regex.IsMatch(v.ElementAt(i), @"^\d{2}/\d{2}/\d{4}"))
-                ? "DateTime"
-                : _values.All(v => (v.Count() <= i) || string.IsNullOrEmpty(v.ElementAt(i)) || v.ElementAt(i).ToLower() == "null" || Regex.IsMatch(v.ElementAt(i), @"^\d{2}/\d{2}/\d{4}"))
-                    ? "DateTime?"
-                    : _values.All(v => (v.Count() <= i) || int.TryParse(v.ElementAt(i), out var n))
-                        ? "int"
-                        : _values.All(v => (v.Count() <= i) || string.IsNullOrEmpty(v.ElementAt(i)) || v.ElementAt(i).ToLower() == "null" || int.TryParse(v.ElementAt(i), out var n))
-                            ? "int?"
-                            : _values.All(v => (v.Count() <= i) || decimal.TryParse(v.ElementAt(i), out var d))
-                                ? "decimal"
-                                : _values.All(v => (v.Count() <= i) || string.IsNullOrEmpty(v.ElementAt(i)) || v.ElementAt(i).ToLower() == "null" || decimal.TryParse(v.ElementAt(i), out var d))
-                                    ? "decimal?"
-                                    : "string";
+            var values = _values.Where(v => v.Count() > i).Select(v => v.ElementAt(i));
+
+            var res = values.All(v => {
+                var b = Regex.IsMatch(v, @"^\d{2}/\d{2}/\d{4}");
+                return b;
+            });
+
+            if (IsNullableDatetime(values))
+                return "DateTime";
+            if (IsDatetime(values))
+                return "DateTime?";
+            if (IsNullableInt(values))
+                return "int";
+            if (IsNullableInt(values))
+                return "int?";
+            if (IsNullableDecimal(values))
+                return "decimal";
+            if (IsDecimal(values))
+                return "decimal?";
+
+            return "string";
         }
+
+        private bool IsDatetime(IEnumerable<string> values)
+            => values.All(v => Regex.IsMatch(v, @"^\d{2}/\d{2}/\d{4}"));
+
+        private bool IsNullableDatetime(IEnumerable<string> values)
+            => values.Any(v => Regex.IsMatch(v, @"^\d{2}/\d{2}/\d{4}"))
+                && values.All(v => string.IsNullOrEmpty(v) || v.ToLower() == "null" || Regex.IsMatch(v, @"^\d{2}/\d{2}/\d{4}"));
+
+        private bool IsInt(IEnumerable<string> values)
+            => values.All(v => int.TryParse(v, out var n));
+
+        private bool IsNullableInt(IEnumerable<string> values)
+            => values.Any(v => int.TryParse(v, out var n))
+                && values.All(v => string.IsNullOrEmpty(v) || v.ToLower() == "null" || int.TryParse(v, out var n));
+
+        private bool IsNullableDecimal(IEnumerable<string> values)
+            => values.Any(v => decimal.TryParse(v, out var d))
+                && values.All(v => string.IsNullOrEmpty(v) || v.ToLower() == "null" || decimal.TryParse(v, out var d));
+
+        private bool IsDecimal(IEnumerable<string> values)
+            => values.All(v => decimal.TryParse(v, out var d));
     }
 }
