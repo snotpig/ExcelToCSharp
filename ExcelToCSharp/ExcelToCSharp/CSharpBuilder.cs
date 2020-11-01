@@ -88,11 +88,6 @@ namespace ExcelToCSharp
         {
             var values = _values.Where(v => v.Count() > i).Select(v => v.ElementAt(i));
 
-            var res = values.All(v => {
-                var b = Regex.IsMatch(v, @"^\d{2}/\d{2}/\d{4}");
-                return b;
-            });
-
             if (IsNullableDatetime(values))
                 return "DateTime";
             if (IsDatetime(values))
@@ -105,7 +100,6 @@ namespace ExcelToCSharp
                 return "decimal";
             if (IsDecimal(values))
                 return "decimal?";
-
             return "string";
         }
 
