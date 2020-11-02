@@ -18,6 +18,9 @@ namespace ExcelToCSharp
 
 		public static string ToJsonDateTime(this string str)
 		{
+			if (string.IsNullOrEmpty(str) || str.ToLower() == "null")
+				return null;
+
 			var dateString = new DateTime(int.Parse(str.Substring(6, 4)), int.Parse(str.Substring(3, 2)),
 				int.Parse(str.Substring(0, 2)), int.Parse(str.Substring(11, 2)), int.Parse(str.Substring(14, 2)), 0)
 					.ToJsonDateTimeString();

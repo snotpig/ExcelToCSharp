@@ -75,11 +75,14 @@ namespace ExcelToCSharp
                 case "decimal":
                     return string.IsNullOrWhiteSpace(value) || value.ToLower() == "null" ? "0" : value;
                 case "string":
-                    return $"\"{value}\"";
+                    return $"\"{value.Replace("\"", "\\\"")}\"";
                 case "DateTime":
                     return $"{value?.ToJsonDateTime() ?? new DateTime().ToJsonDateTimeString()}";
                 case "DateTime?":
                     return $"{value?.ToJsonDateTime() ?? "null"}";
+                case "bool":
+                    var val = value.ToLower();
+                    return (val == "y" || val == "yes").ToString().ToLower();
                 default:
                     throw new InvalidOperationException($"Unecognised type: {type}");
             }

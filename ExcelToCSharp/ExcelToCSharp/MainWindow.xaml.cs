@@ -126,7 +126,7 @@ namespace ExcelToCSharp
 					pgJson.Visibility = Visibility.Visible;
 				}
 				SizeToContent = SizeToContent.Height;
-				_backgroundWorker.RunWorkerAsync(new[] { type });
+				_backgroundWorker.RunWorkerAsync(new[] { type, txtClassName.Text });
 			}
 			else
 				ShowMessage("You must include at least one column");
@@ -150,7 +150,7 @@ namespace ExcelToCSharp
 
 			if (args[0] == "c#")
 			{
-				_code = _cSharpBuilder.GetClassDefinition(sender as BackgroundWorker, txtClassName.Text);
+				_code = _cSharpBuilder.GetClassDefinition(sender as BackgroundWorker, args[1]);
 				e.Result = args[0];
 			}
 			else if (args[0] == "json")
