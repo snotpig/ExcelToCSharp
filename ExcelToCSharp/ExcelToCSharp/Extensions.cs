@@ -12,7 +12,7 @@ namespace ExcelToCSharp
 			str = Regex.Replace(str.ReplaceSymbols().LTrimNonAlpha(), "[a-z][A-Z0-9]", m => $"{m.Value[0]}-{m.Value[1]}");
 
 			return string.Join("", str
-				.Split(new[] { "_", " ", "(", ")", "-", "|", ":", "." }, StringSplitOptions.RemoveEmptyEntries)
+				.Split(new[] { "_", " ", "(", ")", "-", "|", ":", ".", "/" }, StringSplitOptions.RemoveEmptyEntries)
 				.Select(s => $"{char.ToUpper(s[0])}{s.Substring(1).ToLower()}"));
 		}
 
